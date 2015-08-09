@@ -1,6 +1,6 @@
 CXX = g++
-CFLAGS = -std=c++11 -fopenmp
-LFLAGS = -fopenmp -Wall -I/usr/include/libdrm -lGLU -lGL -lglut -O3
+CFLAGS = -std=c++11
+LFLAGS = -Wall -I/usr/include/libdrm -lGLEW -lGLU -lGL -lglut -O3
 
 target_file  := main
 prog_name    := jx

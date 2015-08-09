@@ -1,20 +1,19 @@
+#include <GL/glew.h>
 #include <GL/glut.h>  // GLUT, includes glu.h and gl.h
 #include <complex>
 #include <iostream>
+#include <fstream>
 
-struct rgb{
-    float r, g, b;
-};
 
+GLuint p;
 const int window_width = 800;
 const int window_height = 600;
 int origin_x = window_width / 2;
 int origin_y = window_height / 2;
 const int n_max = 200;
 double scale = 6. / window_width;
-auto c = std::complex<double>(-0.74, 0.14);
-
-struct rgb pixels[841*1440], palette[n_max + 1];
+float cx = -0.74;
+float cy = 0.14;
 
 void special_input(int key, int x, int y) {
     switch(key) {
@@ -37,16 +36,16 @@ void special_input(int key, int x, int y) {
 void input(unsigned char key, int x, int y) {
     switch(key) {
         case 'w':
-            c += std::complex<double>(0, 0.01);
+            cy += 0.01;
             break;
         case 's':
-            c -= std::complex<double>(0, 0.01);
+            cy -= 0.01;
             break;
         case 'a':
-            c -= std::complex<double>(0.01, 0);
+            cx -= 0.01;
             break;
         case 'd':
-            c += std::complex<double>(0.01, 0);
+            cx += 0.01;
             break;
         case '0':
             scale /= 1.2;
@@ -62,7 +61,7 @@ void input(unsigned char key, int x, int y) {
             exit(0);
             break;
     }
-    std::cout << c << std::endl;
+    std::cout << cx << ", " << cy << std::endl;
     glutPostRedisplay();
 }
 
@@ -72,38 +71,59 @@ void display() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
 
-    auto r = (1 + sqrt(1 + 4 * abs(c))) / 2;
-    #pragma omp parallel for collapse(2)
-    for (int i = 0; i < window_height; ++i)
-        for (int j = 0; j < window_width; ++j) {
-            double x = (j - origin_x) * scale;
-            double y = (origin_y - i) * scale;
-            auto z = std::complex<double>(x, y);
+    glUniform2f(glGetUniformLocation(p, "c"), cx, cy);
+    glUniform1i(glGetUniformLocation(p, "iter"), n_max);
 
-            int n = 0;
-            for (n = 0; n < n_max; ++n)
-            {
-                z = z * z + c;
-                if (abs(z) > r)
-                    break;
-            }
+    glBegin(GL_POLYGON);
+    glTexCoord2f(1, 0);
+    glVertex2f(1, -1);
+    glTexCoord2f(1, 1);
+    glVertex2f(1, 1);
+    glTexCoord2f(0, 1);
+    glVertex2f(-1, 1);
+    glTexCoord2f(0, 0);
+    glVertex2f(-1, -1);
+    glEnd();
 
-            pixels[i * window_width + j] = palette[n];
-        }
-
-    glDrawPixels(window_width, window_height, GL_RGB, GL_FLOAT, pixels);
     glutSwapBuffers();
 }
 
-void init() {
-    for (int i = 0; i < n_max+1; ++i) {
-        float c = (float) i / (n_max+1);
-        palette[i] = {c, c, c};
-    }
-}
+void setShaders() {
+    GLuint v;
+
+    // get a shader handler
+    v = glCreateShader(GL_FRAGMENT_SHADER);
+    // read the shader source from a file
+    std::ifstream is("src/julia.glsl", std::ios::in|std::ios::binary|std::ios::ate);
+	if (!is.is_open()) {
+		std::cerr << "Unable to open file " << "src/julia.glsl" << std::endl;
+		exit(1);
+	}
+	long size = is.tellg();
+	char *vs = new char[size+1];
+	is.seekg(0, std::ios::beg);
+	is.read (vs, size);
+	is.close();
+	vs[size] = 0;
+
+    // conversions to fit the next function
+    const char *vv = vs;
+    // pass the source text to GL
+    glShaderSource(v, 1, &vv,NULL);
+    // free the memory from the source text
+    delete[] vs;
+    // finally compile the shader
+    glCompileShader(v);
+
+    p = glCreateProgram();
+    glAttachShader(p, v);
+    glLinkProgram(p);
+
+    glUseProgram(p);
+};
+
 /* Main function: GLUT runs as a console application starting at main()  */
 int main(int argc, char** argv) {
-    init();
     glutInit(&argc, argv);                 // Initialize GLUT
     glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
     glutInitWindowSize(window_width, window_height);   // Set the window's initial width & height
@@ -112,6 +132,10 @@ int main(int argc, char** argv) {
     glutSpecialFunc(special_input);
     glutKeyboardFunc(input);
     glutDisplayFunc(display); // Register display callback handler for window re-paint
+
+    glewInit();
+	setShaders();
+
     glutMainLoop();           // Enter the infinitely event-processing loop
     return 0;
 }
