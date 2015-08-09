@@ -1,6 +1,5 @@
 #include <GL/glew.h>
 #include <GL/glut.h>  // GLUT, includes glu.h and gl.h
-#include <complex>
 #include <iostream>
 #include <fstream>
 
@@ -8,26 +7,33 @@
 GLuint p;
 const int window_width = 800;
 const int window_height = 600;
+int max_size = window_height;
 int origin_x = window_width / 2;
 int origin_y = window_height / 2;
-const int n_max = 200;
-double scale = 6. / window_width;
+int n_max = 200;
+
+float scalex = 6. / window_width * max_size;
+float scaley = 6. / window_height * max_size;
+
+float ox = 0.5;
+float oy = 0.5;
+
 float cx = -0.74;
 float cy = 0.14;
 
 void special_input(int key, int x, int y) {
     switch(key) {
         case GLUT_KEY_UP:
-            origin_y -= 5;
+            oy -= 0.05;
             break;
         case GLUT_KEY_DOWN:
-            origin_y += 5;
+            oy += 0.05;
             break;
         case GLUT_KEY_LEFT:
-            origin_x += 5;
+            ox += 0.05;
             break;
         case GLUT_KEY_RIGHT:
-            origin_x -= 5;
+            ox -= 0.05;
             break;
     }
     glutPostRedisplay();
@@ -47,15 +53,29 @@ void input(unsigned char key, int x, int y) {
         case 'd':
             cx += 0.01;
             break;
+        case '-':
+            n_max -= 10;
+            break;
+        case '=':
+            n_max += 10;
+            break;
+        case '_':
+            n_max *= 1.2;
+            break;
+        case '+':
+            n_max += (int)(0.2*n_max);
+            break;
         case '0':
-            scale /= 1.2;
-            origin_x = window_width / 2 + (origin_x - window_width / 2) / 1.2;
-            origin_y = window_width / 2 + (origin_y - window_width / 2) / 1.2;
+            scalex /= 1.2;
+            scaley /= 1.2;
+            ox = 0.5 + (ox - 0.5) / 1.2;
+            oy = 0.5 + (oy - 0.5) / 1.2;
             break;
         case '9':
-            scale *= 1.2;
-            origin_x = window_width / 2 + (origin_x - window_width / 2) * 1.2;
-            origin_y = window_width / 2 + (origin_y - window_width / 2) * 1.2;
+            scalex *= 1.2;
+            scaley *= 1.2;
+            ox = 0.5 + (ox - 0.5) * 1.2;
+            oy = 0.5 + (oy - 0.5) * 1.2;
             break;
         case 'q':
             exit(0);
@@ -71,7 +91,11 @@ void display() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
 
+    glUseProgram(p);
+
     glUniform2f(glGetUniformLocation(p, "c"), cx, cy);
+    glUniform2f(glGetUniformLocation(p, "scale"), scalex, scaley);
+    glUniform2f(glGetUniformLocation(p, "o"), ox, oy);
     glUniform1i(glGetUniformLocation(p, "iter"), n_max);
 
     glBegin(GL_POLYGON);
@@ -118,8 +142,6 @@ void setShaders() {
     p = glCreateProgram();
     glAttachShader(p, v);
     glLinkProgram(p);
-
-    glUseProgram(p);
 };
 
 /* Main function: GLUT runs as a console application starting at main()  */
