@@ -12,13 +12,13 @@ int origin_x = window_width / 2;
 int origin_y = window_height / 2;
 int n_max = 200;
 
-float scalex = 6. / window_width * max_size;
-float scaley = 6. / window_height * max_size;
+float scalex = 5. / max_size * window_width;
+float scaley = 5. / max_size * window_height;
 
 float ox = 0.5;
 float oy = 0.5;
 
-float cx = -0.74;
+float cx = -0.24;
 float cy = 0.14;
 
 void special_input(int key, int x, int y) {
@@ -42,16 +42,16 @@ void special_input(int key, int x, int y) {
 void input(unsigned char key, int x, int y) {
     switch(key) {
         case 'w':
-            cy += 0.01;
+            cy += 0.001;
             break;
         case 's':
-            cy -= 0.01;
+            cy -= 0.001;
             break;
         case 'a':
-            cx -= 0.01;
+            cx -= 0.001;
             break;
         case 'd':
-            cx += 0.01;
+            cx += 0.001;
             break;
         case '-':
             n_max -= 10;
@@ -60,22 +60,22 @@ void input(unsigned char key, int x, int y) {
             n_max += 10;
             break;
         case '_':
-            n_max *= 1.2;
+            n_max -= int(0.2 * n_max);
             break;
         case '+':
-            n_max += (int)(0.2*n_max);
+            n_max += int(0.2*n_max);
             break;
         case '0':
             scalex /= 1.2;
             scaley /= 1.2;
-            ox = 0.5 + (ox - 0.5) / 1.2;
-            oy = 0.5 + (oy - 0.5) / 1.2;
+            ox = 0.5 + (ox - 0.5) * 1.2;
+            oy = 0.5 + (oy - 0.5) * 1.2;
             break;
         case '9':
             scalex *= 1.2;
             scaley *= 1.2;
-            ox = 0.5 + (ox - 0.5) * 1.2;
-            oy = 0.5 + (oy - 0.5) * 1.2;
+            ox = 0.5 + (ox - 0.5) / 1.2;
+            oy = 0.5 + (oy - 0.5) / 1.2;
             break;
         case 'q':
             exit(0);
@@ -109,6 +109,7 @@ void display() {
     glVertex2f(-1, -1);
     glEnd();
 
+    glUseProgram(0);
     glutSwapBuffers();
 }
 
