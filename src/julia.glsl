@@ -20,5 +20,6 @@ void main() {
     }
 
     float a = float(i) / float(iter);
-    gl_FragColor = vec4(a, a, a, 1.0);
+    gl_FragColor = vec4(0.2 + 0.8 * (0.5 - 0.5 * cos(9.42 * a)),  0.6 + 0.4 * (0.5 - 0.5 * cos(9.42 * a)),
+    1.0 - 0.2 * (a - a * a), 1.0);
 }
