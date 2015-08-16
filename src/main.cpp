@@ -6,20 +6,19 @@
 struct Fractal {
     float scale;
     glm::vec2 origin;
-
     int iterations;
-
-    GLuint program;
 };
 
-Window* w;
-Fractal julia = {3.0, {0.5, 0.5}, 100, 0};
-Fractal mbrot = {3.0, {0.5, 0.5}, 100, 0};
-bool show_julia = false;
+Window *w;
+ShaderManager *juliaShader, *mbrotShader;
+
+Fractal julia = {3.0, {0.5, 0.5}, 100};
+Fractal mbrot = {3.0, {0.5, 0.5}, 100};
+Fractal* current = &julia;
+
 float scale_factor = 1.2;
 glm::vec2 center(0.5, 0.5);
 glm::vec2 c(-0.74, 0.14);
-Fractal* current = &julia;
 
 void special_input(int key, int x, int y) {
     switch(key) {
@@ -74,7 +73,7 @@ void input(unsigned char key, int x, int y) {
             current->origin = center + (current->origin - center) / scale_factor;
             break;
         case 'm':
-            show_julia = !show_julia;
+            current = (current == &julia) ? &mbrot : &julia;
             break;
         case 'q':
             exit(0);
@@ -88,19 +87,17 @@ void render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
 
-    if (show_julia)
-        current = &julia;
-    else
-        current = &mbrot;
-
-    glUseProgram(current->program);
-
     auto max_size = std::max(w->height, w->width);
-    auto scale = glm::vec2(current->scale / max_size * w->width, current->scale / max_size * w->height);
-    glUniform2f(glGetUniformLocation(current->program, "c"), c.x, c.y);
-    glUniform2f(glGetUniformLocation(current->program, "scale"), scale.x, scale.y);
-    glUniform2f(glGetUniformLocation(current->program, "o"), current->origin.x, current->origin.y);
-    glUniform1i(glGetUniformLocation(current->program, "iter"), current->iterations);
+    auto scale = glm::vec2(current->scale / max_size * w->width,
+                           current->scale / max_size * w->height);
+
+    ShaderManager *shader = (current == &julia) ? mbrotShader : juliaShader;
+
+    shader->run();
+    shader->uniform2f("c", c);
+    shader->uniform2f("scale", scale);
+    shader->uniform2f("o", current->origin);
+    shader->uniform1i("iter", current->iterations);
 
     glBegin(GL_POLYGON);
     glTexCoord2f(1, 0);
@@ -113,7 +110,7 @@ void render() {
     glVertex2f(-1, -1);
     glEnd();
 
-    glUseProgram(0);
+    shader->stop();
     glutSwapBuffers();
 }
 
@@ -135,15 +132,10 @@ int main(int argc, char** argv) {
     w->setRender(render);
     w->setReshape(reshape);
 
-    auto shader = compileShader("./src/julia.glsl", GL_FRAGMENT_SHADER);
-    auto p = glCreateProgram();
-    addShader(p, shader);
-    julia.program = p;
-
-    shader = compileShader("./src/mbrot.glsl", GL_FRAGMENT_SHADER);
-    p = glCreateProgram();
-    addShader(p, shader);
-    mbrot.program = p;
+    juliaShader = new ShaderManager();
+    mbrotShader = new ShaderManager();
+    juliaShader->addShader("./src/julia.glsl", GL_FRAGMENT_SHADER);
+    mbrotShader->addShader("./src/mbrot.glsl", GL_FRAGMENT_SHADER);
 
     glutMainLoop();           // Enter the infinitely event-processing loop
     return 0;

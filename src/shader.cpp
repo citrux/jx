@@ -1,14 +1,16 @@
 #include <iostream>
 #include <fstream>
-#include <GL/glew.h>
 #include "shader.hpp"
 
-GLuint compileShader(const char* fileName, GLenum shaderType) {
-    GLuint handler;
+ShaderManager::ShaderManager() {
+    program = glCreateProgram();
+}
 
-    // get a shader handler
-    handler = glCreateShader(shaderType);
-    // read the shader source from a file
+ShaderManager::~ShaderManager() {
+    glDeleteProgram(program);
+}
+
+char* readFile(const char* fileName) {
     std::ifstream is(fileName, std::ios::in|std::ios::binary|std::ios::ate);
 	if (!is.is_open()) {
 		std::cerr << "Unable to open file " << fileName << std::endl;
@@ -22,19 +24,44 @@ GLuint compileShader(const char* fileName, GLenum shaderType) {
 	is.read (buffer, size);
 	is.close();
 	buffer[size] = 0;
+    return buffer;
+}
 
+GLuint ShaderManager::compileShader(const char* fileName, GLenum shaderType) {
+    GLuint handler;
+
+    // get a shader handler
+    handler = glCreateShader(shaderType);
+    // read the shader source from a file
     // conversions to fit the next function
-    const char* const_buffer = buffer;
+    const char* buffer = readFile(fileName);
     // pass the source text to GL
-    glShaderSource(handler, 1, &const_buffer, 0);
-    // free the memory from the source text
-    delete[] buffer;
+    glShaderSource(handler, 1, &buffer, 0);
     // finally compile the shader
     glCompileShader(handler);
     return handler;
 }
 
-void addShader(GLuint program, GLuint shader) {
+void ShaderManager::addShader(const char* fileName, GLenum shaderType) {
+    auto shader = compileShader(fileName, shaderType);
     glAttachShader(program, shader);
     glLinkProgram(program);
 };
+
+void ShaderManager::run() {
+    glUseProgram(program);
+}
+
+void ShaderManager::stop() {
+    glUseProgram(0);
+}
+
+void ShaderManager::uniform1i(const char* varName, int value) {
+    glUniform1i(glGetUniformLocation(program, varName), value);
+}
+
+void ShaderManager::uniform2f(const char* varName, glm::vec2 value) {
+    glUniform2f(glGetUniformLocation(program, varName), value.x, value.y);
+}
+
+
