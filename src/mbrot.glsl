@@ -9,9 +9,9 @@ void main() {
     z.y = scale.y * (gl_TexCoord[0].y - o.y);
 
     float eps = 0.005 * scale.x;
-    if (pow(z.x - c.x, 2) +
-        pow(z.y - c.y, 2) < eps * eps) {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    float dist = sqrt(pow(z.x - c.x, 2) + pow(z.y - c.y, 2)) / eps;
+    if (dist < 1.0) {
+        gl_FragColor = vec4(1.0 - 0.5 * dist, 0.2, 0.2, 1.0);
         return;
     }
 

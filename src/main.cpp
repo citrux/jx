@@ -91,7 +91,7 @@ void render() {
     auto scale = glm::vec2(current->scale / max_size * w->width,
                            current->scale / max_size * w->height);
 
-    ShaderManager *shader = (current == &julia) ? mbrotShader : juliaShader;
+    ShaderManager *shader = (current == &julia) ? juliaShader : mbrotShader;
 
     shader->run();
     shader->uniform2f("c", c);
