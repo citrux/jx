@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "GL/freeglut_ext.h"
 
 Window::Window(std::string title, int width, int height) :
     width(width), height(height)

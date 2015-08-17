@@ -45,8 +45,11 @@ GLuint ShaderProgram::compileShader(const char* fileName, GLenum shaderType) {
 void ShaderProgram::addShader(const char* fileName, GLenum shaderType) {
     auto shader = compileShader(fileName, shaderType);
     glAttachShader(program, shader);
-    glLinkProgram(program);
 };
+
+void ShaderProgram::link() {
+    glLinkProgram(program);
+}
 
 void ShaderProgram::run() {
     glUseProgram(program);

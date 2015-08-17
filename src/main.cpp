@@ -96,6 +96,14 @@ void mouse(int button, int state, int x, int y) {
                 c.y = scale.y * (ty - current->origin.y);
             }
             break;
+        case 3:
+            current->scale /= scale_factor;
+            current->origin = center + (current->origin - center) * scale_factor;
+            break;
+        case 4:
+            current->scale *= scale_factor;
+            current->origin = center + (current->origin - center) / scale_factor;
+            break;
         default:
             break;
     }
@@ -152,9 +160,12 @@ int main(int argc, char** argv) {
     w->setReshape(reshape);
 
     juliaShader = new ShaderProgram();
-    mbrotShader = new ShaderProgram();
     juliaShader->addShader("./src/julia.glsl", GL_FRAGMENT_SHADER);
+    juliaShader->link();
+
+    mbrotShader = new ShaderProgram();
     mbrotShader->addShader("./src/mbrot.glsl", GL_FRAGMENT_SHADER);
+    mbrotShader->link();
 
     glutMainLoop();           // Enter the infinitely event-processing loop
     return 0;
