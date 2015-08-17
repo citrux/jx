@@ -2,11 +2,11 @@
 #include <fstream>
 #include "shader.hpp"
 
-ShaderManager::ShaderManager() {
+ShaderProgram::ShaderProgram() {
     program = glCreateProgram();
 }
 
-ShaderManager::~ShaderManager() {
+ShaderProgram::~ShaderProgram() {
     glDeleteProgram(program);
 }
 
@@ -27,7 +27,7 @@ char* readFile(const char* fileName) {
     return buffer;
 }
 
-GLuint ShaderManager::compileShader(const char* fileName, GLenum shaderType) {
+GLuint ShaderProgram::compileShader(const char* fileName, GLenum shaderType) {
     GLuint handler;
 
     // get a shader handler
@@ -42,25 +42,25 @@ GLuint ShaderManager::compileShader(const char* fileName, GLenum shaderType) {
     return handler;
 }
 
-void ShaderManager::addShader(const char* fileName, GLenum shaderType) {
+void ShaderProgram::addShader(const char* fileName, GLenum shaderType) {
     auto shader = compileShader(fileName, shaderType);
     glAttachShader(program, shader);
     glLinkProgram(program);
 };
 
-void ShaderManager::run() {
+void ShaderProgram::run() {
     glUseProgram(program);
 }
 
-void ShaderManager::stop() {
+void ShaderProgram::stop() {
     glUseProgram(0);
 }
 
-void ShaderManager::uniform1i(const char* varName, int value) {
+void ShaderProgram::uniform1i(const char* varName, int value) {
     glUniform1i(glGetUniformLocation(program, varName), value);
 }
 
-void ShaderManager::uniform2f(const char* varName, glm::vec2 value) {
+void ShaderProgram::uniform2f(const char* varName, glm::vec2 value) {
     glUniform2f(glGetUniformLocation(program, varName), value.x, value.y);
 }
 

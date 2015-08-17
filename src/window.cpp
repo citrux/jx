@@ -12,6 +12,7 @@ Window::Window(std::string title, int width, int height) :
 
 void Window::setSpecialInput(void(*f)(int key, int x, int y)) {glutSpecialFunc(f);};
 void Window::setInput(void(*f)(unsigned char key, int x, int y)) {glutKeyboardFunc(f);};
+void Window::setMouse(void(*f)(int button, int state, int x, int y)) {glutMouseFunc(f);};
 void Window::setRender(void(*f)()) {glutDisplayFunc(f);};
 void Window::setReshape(void(*f)(int w, int h)) {glutReshapeFunc(f);};
 

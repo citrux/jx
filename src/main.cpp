@@ -10,10 +10,10 @@ struct Fractal {
 };
 
 Window *w;
-ShaderManager *juliaShader, *mbrotShader;
+ShaderProgram *juliaShader, *mbrotShader;
 
 Fractal julia = {3.0, {0.5, 0.5}, 100};
-Fractal mbrot = {3.0, {0.5, 0.5}, 100};
+Fractal mbrot = {3.0, {0.75, 0.5}, 100};
 Fractal* current = &julia;
 
 float scale_factor = 1.2;
@@ -83,6 +83,32 @@ void input(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
+void mouse(int button, int state, int x, int y) {
+    switch (button) {
+        case GLUT_LEFT_BUTTON:
+            if (state == GLUT_DOWN && current == &mbrot) {
+                float tx = float(x) / w->width;
+                float ty = 1.0 - float(y) / w->height;
+                auto max_size = std::max(w->height, w->width);
+                auto scale = glm::vec2(current->scale / max_size * w->width,
+                                       current->scale / max_size * w->height);
+                c.x = scale.x * (tx - current->origin.x);
+                c.y = scale.y * (ty - current->origin.y);
+            }
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void reshape(int width, int height) {
+    w->width=width;
+    w->height=height;
+
+    glViewport(0, 0, w->width, w->height);
+};
+
 void render() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set background color to black and opaque
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
@@ -91,7 +117,7 @@ void render() {
     auto scale = glm::vec2(current->scale / max_size * w->width,
                            current->scale / max_size * w->height);
 
-    ShaderManager *shader = (current == &julia) ? juliaShader : mbrotShader;
+    ShaderProgram *shader = (current == &julia) ? juliaShader : mbrotShader;
 
     shader->run();
     shader->uniform2f("c", c);
@@ -115,25 +141,18 @@ void render() {
 }
 
 
-
-void reshape(int width, int height) {
-    w->width=width;
-    w->height=height;
-
-    glViewport(0, 0, w->width, w->height);
-};
-
 /* Main function: GLUT runs as a console application starting at main()  */
 int main(int argc, char** argv) {
     glutInit(&argc, argv);                 // Initialize GLUT
     w = new Window("Julia set", 800, 600);
     w->setInput(input);
     w->setSpecialInput(special_input);
+    w->setMouse(mouse);
     w->setRender(render);
     w->setReshape(reshape);
 
-    juliaShader = new ShaderManager();
-    mbrotShader = new ShaderManager();
+    juliaShader = new ShaderProgram();
+    mbrotShader = new ShaderProgram();
     juliaShader->addShader("./src/julia.glsl", GL_FRAGMENT_SHADER);
     mbrotShader->addShader("./src/mbrot.glsl", GL_FRAGMENT_SHADER);
 

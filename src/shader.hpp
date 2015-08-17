@@ -2,10 +2,10 @@
 #include <GL/glew.h>
 #include <glm/vec2.hpp>
 
-class ShaderManager {
+class ShaderProgram {
     public:
-        ShaderManager();
-        ~ShaderManager();
+        ShaderProgram();
+        ~ShaderProgram();
         void addShader(const char* fileName, GLenum shaderType);
 
         void uniform1i(const char* varName, int value);

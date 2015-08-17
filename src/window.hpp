@@ -11,7 +11,7 @@ class Window {
 
         void setSpecialInput(void(*)(int key, int x, int y));
         void setInput(void(*)(unsigned char key, int x, int y));
+        void setMouse(void(*)(int button, int state, int x, int y));
         void setRender(void(*)());
         void setReshape(void(*)(int w, int h));
-
 };
