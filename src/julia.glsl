@@ -1,25 +1,27 @@
-uniform vec2 c;
-uniform vec2 o;
-uniform vec2 scale;
-uniform int iter;
+#version 120
+
+uniform vec2  c;
+uniform vec2  origin;
+uniform vec2  scale;
+uniform float radius;
+uniform int   iterations;
 
 void main() {
-    vec2 z;
-	z.x = scale.x * (gl_TexCoord[0].x - o.x);
-    z.y = scale.y * (gl_TexCoord[0].y - o.y);
+    vec2 z = scale * (gl_TexCoord[0].xy - origin);
 
     int i;
-    float r = 0.5 + sqrt(0.25 + sqrt(c.x * c.x + c.y * c.y));
-    for(i=0; i<iter; i++) {
+    for (i = 0; i < iterations; ++i) {
         float x = z.x * z.x - z.y * z.y + c.x;
         float y = z.x * z.y + z.x * z.y + c.y;
 
-        if((x * x + y * y) > r * r) break;
-        z.x = x;
-        z.y = y;
+        z.x = x; z.y = y;
+        if (length(z) > radius) break;
+
     }
 
-    float a = float(i) / float(iter);
-    gl_FragColor = vec4(0.2 + 0.8 * (0.5 - 0.5 * cos(9.42 * a)),  0.6 + 0.4 * (0.5 - 0.5 * cos(9.42 * a)),
-    1.0 - 0.2 * (a - a * a), 1.0);
+    float p = float(i) / float(iterations);
+    float r = 0.2 + 0.8 * (0.5 - 0.5 * cos(9.42 * p));
+    float g = 0.6 + 0.4 * (0.5 - 0.5 * cos(9.42 * p));
+    float b = 1.0 - 0.2 * (p - p * p);
+    gl_FragColor = vec4(r, g, b, 1.0);
 }

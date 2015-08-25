@@ -9,8 +9,9 @@ class ShaderProgram {
         void addShader(const char* fileName, GLenum shaderType);
         void link();
 
-        void uniform1i(const char* varName, int value);
-        void uniform2f(const char* varName, glm::vec2 value);
+        void uniform(const char* varName, int value);
+        void uniform(const char* varName, float value);
+        void uniform(const char* varName, glm::vec2 value);
 
         void run();
         void stop();

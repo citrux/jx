@@ -59,11 +59,15 @@ void ShaderProgram::stop() {
     glUseProgram(0);
 }
 
-void ShaderProgram::uniform1i(const char* varName, int value) {
+void ShaderProgram::uniform(const char* varName, int value) {
     glUniform1i(glGetUniformLocation(program, varName), value);
 }
 
-void ShaderProgram::uniform2f(const char* varName, glm::vec2 value) {
+void ShaderProgram::uniform(const char* varName, float value) {
+    glUniform1f(glGetUniformLocation(program, varName), value);
+}
+
+void ShaderProgram::uniform(const char* varName, glm::vec2 value) {
     glUniform2f(glGetUniformLocation(program, varName), value.x, value.y);
 }
 

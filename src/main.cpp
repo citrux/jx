@@ -1,5 +1,6 @@
 #include "glm/vec2.hpp"
 #include <iostream>
+#include <cmath>
 #include "window.hpp"
 #include "shader.hpp"
 
@@ -122,16 +123,16 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
 
     auto max_size = std::max(w->height, w->width);
-    auto scale = glm::vec2(current->scale / max_size * w->width,
-                           current->scale / max_size * w->height);
+    auto scale = glm::vec2(w->width,  w->height) * current->scale / max_size;
 
     ShaderProgram *shader = (current == &julia) ? juliaShader : mbrotShader;
 
     shader->run();
-    shader->uniform2f("c", c);
-    shader->uniform2f("scale", scale);
-    shader->uniform2f("o", current->origin);
-    shader->uniform1i("iter", current->iterations);
+    shader->uniform("c", c);
+    shader->uniform("scale", scale);
+    shader->uniform("origin", current->origin);
+    shader->uniform("iterations", current->iterations);
+    shader->uniform("radius", float(0.5 + sqrt(0.25 + c.length()))); // сработает только для julia
 
     glBegin(GL_POLYGON);
     glTexCoord2f(1, 0);
