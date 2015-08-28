@@ -85,6 +85,7 @@ void input(unsigned char key, int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
+    auto position = glm::vec2(float(x) / w->width, 1.0f - float(y) / w->height);
     switch (button) {
         case GLUT_LEFT_BUTTON:
             if (state == GLUT_DOWN && current == &mbrot) {
@@ -99,11 +100,11 @@ void mouse(int button, int state, int x, int y) {
             break;
         case 3:
             current->scale /= scale_factor;
-            current->origin = center + (current->origin - center) * scale_factor;
+            current->origin = position + (current->origin - position) * scale_factor;
             break;
         case 4:
             current->scale *= scale_factor;
-            current->origin = center + (current->origin - center) / scale_factor;
+            current->origin = position + (current->origin - position) / scale_factor;
             break;
         default:
             break;
@@ -123,7 +124,7 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
 
     auto max_size = std::max(w->height, w->width);
-    auto scale = glm::vec2(w->width,  w->height) * current->scale / max_size;
+    auto scale = glm::vec2(w->width,  w->height) * (current->scale / max_size);
 
     ShaderProgram *shader = (current == &julia) ? juliaShader : mbrotShader;
 
