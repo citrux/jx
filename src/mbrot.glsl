@@ -34,8 +34,8 @@ void main() {
     }
 
     float p = float(i) / float(iterations);
-    float r = 0.2 + 0.8 * (0.5 - 0.5 * cos(9.42 * p));
-    float g = 0.6 + 0.4 * (0.5 - 0.5 * cos(9.42 * p));
-    float b = 1.0 - 0.2 * (p - p * p);
+    float r = 0.2 + 0.8 * p;
+    float g = 0.6 + 0.4 * p;
+    float b = 1.0;
     gl_FragColor = vec4(r, g, b, 1.0);
 }
