@@ -14,4 +14,5 @@ class Window {
         void setMouse(void(*)(int button, int state, int x, int y));
         void setRender(void(*)());
         void setReshape(void(*)(int w, int h));
+        void setMotion(void(*)(int x, int y));
 };

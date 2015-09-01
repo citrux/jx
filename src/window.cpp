@@ -16,5 +16,6 @@ void Window::setInput(void(*f)(unsigned char key, int x, int y)) {glutKeyboardFu
 void Window::setMouse(void(*f)(int button, int state, int x, int y)) {glutMouseFunc(f);};
 void Window::setRender(void(*f)()) {glutDisplayFunc(f);};
 void Window::setReshape(void(*f)(int w, int h)) {glutReshapeFunc(f);};
+void Window::setMotion(void(*f)(int x, int y)) {glutMotionFunc(f);};
 
 

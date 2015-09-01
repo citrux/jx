@@ -13,6 +13,9 @@ struct Fractal {
 Window *w;
 ShaderProgram *juliaShader, *mbrotShader;
 
+bool movement = false;
+glm::vec2 start, end;
+
 Fractal julia = {3.0, {0.5, 0.5}, 100};
 Fractal mbrot = {3.0, {0.75, 0.5}, 100};
 Fractal* current = &julia;
@@ -88,7 +91,7 @@ void mouse(int button, int state, int x, int y) {
     auto position = glm::vec2(float(x) / w->width, 1.0f - float(y) / w->height);
     switch (button) {
         case GLUT_LEFT_BUTTON:
-            if (state == GLUT_DOWN && current == &mbrot) {
+            if (state == GLUT_UP && current == &mbrot && !movement) {
                 float tx = float(x) / w->width;
                 float ty = 1.0 - float(y) / w->height;
                 auto max_size = std::max(w->height, w->width);
@@ -96,6 +99,13 @@ void mouse(int button, int state, int x, int y) {
                                        current->scale / max_size * w->height);
                 c.x = scale.x * (tx - current->origin.x);
                 c.y = scale.y * (ty - current->origin.y);
+            }
+            if (state == GLUT_DOWN) {
+                start = glm::vec2(float(x) / w->width,
+                                  1.0 - float(y) / w->height);
+            }
+            if (state == GLUT_UP && movement) {
+                movement = !movement;
             }
             break;
         case 3:
@@ -109,6 +119,16 @@ void mouse(int button, int state, int x, int y) {
         default:
             break;
     }
+    glutPostRedisplay();
+}
+
+void motion(int x, int y) {
+    movement = true;
+    end = glm::vec2(float(x) / w->width,
+                    1.0 - float(y) / w->height);
+    // переместить origin
+    current->origin += end - start;
+    start = end;
     glutPostRedisplay();
 }
 
@@ -160,6 +180,7 @@ int main(int argc, char** argv) {
     w->setMouse(mouse);
     w->setRender(render);
     w->setReshape(reshape);
+    w->setMotion(motion);
 
     juliaShader = new ShaderProgram();
     juliaShader->addShader("./src/julia.glsl", GL_FRAGMENT_SHADER);
